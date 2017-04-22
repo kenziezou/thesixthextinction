@@ -194,10 +194,6 @@ polyline{
 <blockquote id="quote">
 <p>Though it might be nice to imagine there once was a time when man lived in harmony with nature, it's not clear that he ever really did.</p>
 <p>The anthropologist Richard Leakey has warned that <b>"Homo sapiens might not only be the agent of the sixth extinction, but also risks being one of its victims."</b> </p>
-<!-- <p>A sign in the Hall of Biodiversity offers a quote from the Stanford ecologist Paul Ehrlich: 
-<br><b>"IN PUSHING OTHER SPECIES TO EXTINCTION, HUMANITY IS BUSY SAWING OFF THE LIMB ON WHICH IT PERCHES."</b> </p>
-
-<p>The current extinction has its own novel cause: not an asteroid or a massive volcanic eruption but "one weedy species".</p> -->
 
 <p>---- Elizabeth Kolbert, <i>The Sixth Extinction: An Unnatural History</i></p></blockquote>
 <br>
@@ -279,11 +275,11 @@ var layer2 = svg.append("g");
 //pre 1960 population dataset collected from wikipedia
 //post 1960 population dataset from https://www.kaggle.com/walla2ae/world-population
 d3.queue()
-.defer(d3.json, "data/continent-110m.json")
-.defer(d3.csv, "data/worldPopulation.csv")
-.defer(d3.csv, "data/populationBefore1960.csv")
-.defer(d3.csv, "data/extinction-by-time.csv")
-.defer(d3.csv, "data/coordinates.csv")
+.defer(d3.json, "thesixthextinction/data/continent-110m.json")
+.defer(d3.csv, "thesixthextinction/data/worldPopulation.csv")
+.defer(d3.csv, "thesixthextinction/data/populationBefore1960.csv")
+.defer(d3.csv, "thesixthextinction/data/extinction-by-time.csv")
+.defer(d3.csv, "thesixthextinction/data/coordinates.csv")
 //Main function
 .await(function (error, world, population, popuByContinent, extinctionData, coordinates) {
 
