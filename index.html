@@ -5,7 +5,7 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="http://d3js.org/topojson.v2.min.js"></script>
 <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
-<script src="thesixthextinction/js/nouislider.js"></script>
+<script src="js/nouislider.js"></script>
 <link href="https://fonts.googleapis.com/css?family=Roboto:400,900,700,500,300,200,100|Roboto+Slab" rel="stylesheet">
 <link rel="stylesheet" href="thesixthextinction/css/nouislider.css" />  
 <style type="text/css">
@@ -239,7 +239,7 @@ polyline{
 <br>
 <h2>The IUCN Red List (2016)</h2>
 <h3>All Animal Species and "At Risk" Species</h3>
-<script src="thesixthextinction/js/donutCode.js"></script>
+<script src="js/donutCode.js"></script>
 </div>
 
 <div class="footer">
@@ -275,11 +275,11 @@ var layer2 = svg.append("g");
 //pre 1960 population dataset collected from wikipedia
 //post 1960 population dataset from https://www.kaggle.com/walla2ae/world-population
 d3.queue()
-.defer(d3.json, "thesixthextinction/data/continent-110m.json")
-.defer(d3.csv, "thesixthextinction/data/worldPopulation.csv")
-.defer(d3.csv, "thesixthextinction/data/populationBefore1960.csv")
-.defer(d3.csv, "thesixthextinction/data/extinction-by-time.csv")
-.defer(d3.csv, "thesixthextinction/data/coordinates.csv")
+.defer(d3.json, "data/continent-110m.json")
+.defer(d3.csv, "data/worldPopulation.csv")
+.defer(d3.csv, "data/populationBefore1960.csv")
+.defer(d3.csv, "data/extinction-by-time.csv")
+.defer(d3.csv, "data/coordinates.csv")
 //Main function
 .await(function (error, world, population, popuByContinent, extinctionData, coordinates) {
 
