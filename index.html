@@ -1,0 +1,613 @@
+
+<html>
+<head>
+<title>INFO 3300 - Data-driven Web Applications - Project 2</title>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="http://d3js.org/topojson.v2.min.js"></script>
+<script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+<script src="js/nouislider.js"></script>
+<link href="https://fonts.googleapis.com/css?family=Roboto:400,900,‌​700,500,300,200,100|Roboto+Slab" rel="stylesheet">
+<link rel="stylesheet" href="css/nouislider.css" />  
+<style type="text/css">
+/* All css styling done here except for the slider, 
+which has a separate css file that came with the js file
+*/
+h1 {
+    font-family: "Roboto Slab", serif;
+    color: #9f0404;
+    margin-left: 30px;
+    font-size: 500%;
+    font-weight: 900;
+}
+
+h2 {
+    font-family: "Roboto Slab", serif;
+    color: #9f0404;
+    margin-left: 30px;
+    font-size: 200%;
+}
+
+h3 {
+    margin-left: 480px;
+}
+
+body {
+    font-family: "Roboto", sans-serif;
+    padding: 30px 60px -10px 30px;
+    background-color: #f6f6f6;
+    color: #374e68;
+}
+
+.overlay {
+    height: 0;
+    width: 100%;
+    left: 0;
+    top: 0;
+    position: fixed;
+    z-index: 1;
+    background-color: #9f0404;
+    overflow-y: scroll;
+}
+
+.graphic {
+    z-index:0;
+}
+
+.animalClass {
+    z-index: 2;
+    color: #fbfbfb;
+    font-size: 18px;
+    margin-top: 4em;
+    margin-bottom: 4em;
+    margin-left: 35%;
+}
+
+.species {
+    z-index: 2;
+    color: #f6f6f6;
+    font-size: 16px;
+    font-weight:300;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+
+}
+
+.icons {
+    margin: 40px 30px 20px 100px;
+    padding: 3px;
+    border-color: #efefef;
+    border-radius: 50px;
+    box-shadow: 0 0 0 rgba(200, 50, 50, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.circles {
+    cursor: pointer;
+}
+
+#slider {
+    margin-bottom: 20px;
+}
+
+.countryTooltip {
+    color: #425871;
+    font-weight: 300;
+}
+
+#mapLegend {
+    font-size: 60%;
+    font-weight: 200;
+    margin-bottom: 0px;
+}
+
+p.explain {
+    margin-left: 500px;
+    color: #80a5cc;
+}
+
+#quote {
+    border: none;
+    border-radius: 20px;
+    margin-left: 30px;
+    margin-right: 120px;
+    padding:40 80 40 80;
+    color: #fbfbfb;
+    background-color: #6d86a1;
+    font-size: 20px;
+}
+
+.footer {
+    margin-top: 40px;
+    margin-left: 40px;
+    margin-bottom: 40px;
+    color: #6d86a1;
+    font-size: 14px;
+}
+
+a:link {
+    color: #e18f7f;
+}
+
+a:visited {
+    color: #80a5cc;
+}
+/*pulse animation code from http://codepen.io/olam/pen/zcqea*/
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(200, 50, 50, 0.3);
+  }
+  70% {
+      box-shadow: 0 0 2px 5px rgba(200, 50, 50, 0);
+  }
+  100% {
+      box-shadow: 0 0 0 0 rgba(200, 50, 50, 0);
+  }
+}
+
+/*donut chart style
+*/
+polyline{
+  opacity: .3;
+  stroke: #142538;
+  stroke-width: 2px;
+  fill: none;
+}
+
+.labelValue
+{
+  font-size: 60%;
+  opacity: 0.5;
+  color: #142538;
+}
+
+.toolTip {
+    position: absolute;
+    display: none;
+    width: 300px;
+    height: auto;
+    background: none repeat scroll 0 0 white;
+    opacity: 0.9;
+    border:  none;
+    border-radius: 5px;
+    color: #425871;
+    padding: 8px;
+    font-weight: 300;
+}
+.legend text {
+    font-size: 12px;
+    fill: #425871;
+}
+.labelName text {
+    font-size: 14px;
+    fill: #425871;
+}
+
+.donutChart {
+    margin-left: 40px;
+    margin-bottom: 40px;
+}
+</style>
+</head>
+
+<body>
+<h1>The Sixth Extinction</h1>
+<blockquote id="quote">
+<p>Though it might be nice to imagine there once was a time when man lived in harmony with nature, it's not clear that he ever really did.</p>
+<p>The anthropologist Richard Leakey has warned that <b>"Homo sapiens might not only be the agent of the sixth extinction, but also risks being one of its victims."</b> </p>
+<!-- <p>A sign in the Hall of Biodiversity offers a quote from the Stanford ecologist Paul Ehrlich: 
+<br><b>"IN PUSHING OTHER SPECIES TO EXTINCTION, HUMANITY IS BUSY SAWING OFF THE LIMB ON WHICH IT PERCHES."</b> </p>
+
+<p>The current extinction has its own novel cause: not an asteroid or a massive volcanic eruption but "one weedy species".</p> -->
+
+<p>---- Elizabeth Kolbert, <i>The Sixth Extinction: An Unnatural History</i></p></blockquote>
+<br>
+<h2>Extinction by Time and Place</h2>
+</br>
+
+<!-- mapping extinction -->
+<div id="myNav" class="overlay"></div>
+<div id="map" class="graphic"></div>
+<div id="mapLegend">
+<p class="explain">** pre 1960 population density shown by continents, post 1960 shown by countries **</p>
+</div>
+<div id="slider" class="graphic"></div>
+<div class="buttons">
+    <!-- image from http://www.iconninja.com/mole-mammal-animal-shape-icon-858145 -->
+    <input class="icons" id="mammalExtinction" type="image" src="icons/mammal.png" 
+    alt="Mammal" width="72" height="72" value="Mammal"/>
+
+    <!-- image from http://www.rw-designer.com/icon-detail/8823 -->
+    <input class="icons" id="birdButton" type="image" src="icons/bird.png" 
+    alt="Bird" width="72" height="72" value="Bird"/>
+
+    <!-- image from https://wikispaces.psu.edu/display/Herps/Christianna+Stang -->
+    <input class="icons" id="amphibianButton" type="image" src="icons/amphibian.png" 
+    alt="Amphibian" width="72" height="72" value="Amphibian"/>
+
+    <!-- image from http://www.clipartbest.com/fish-icon-png -->
+    <input class="icons" id="fishButton" type="image" src="icons/fish.png" 
+    alt="Fish" width="72" height="72" value="Fish"/>
+
+    <!-- image from http://www.iconsdb.com/black-icons/ant-3-icon.html -->
+    <input class="icons" id="insectButton" type="image" src="icons/insect.png" 
+    alt="Insect" width="72" height="72" value="Insect"/>
+
+    <!-- image from http://www.clker.com/clipart-black-shrimp-icon.html -->
+    <input class="icons" id="crustaceanButton" type="image" src="icons/crustacean.png" 
+    alt="Crustacean" width="72" height="72" value="Crustacean"/>
+</div>
+
+<!-- Donut chart of animal endangerment severity-->
+<div id="donut" class="graphic">
+<br>
+<br>
+<h2>The IUCN Red List (2016)</h2>
+<h3>All Animal Species and "At Risk" Species</h3>
+<script src="js/donutCode.js"></script>
+</div>
+
+<div class="footer">
+<p>Data from <a href="https://en.wikipedia.org/wiki/Lists_of_extinct_animals">Wikipedia: Lists of extinct animals</a>, 
+<a href="https://www.kaggle.com/walla2ae/world-population">World Bank Statistics: World Population</a>,
+and <a href="http://apiv3.iucnredlist.org">IUCN Red List API</a>.
+<br>Visualization by Kenzie Zou, Yue Xu, and Yuxiang Peng</p>
+</div>
+
+<script type="text/javascript">
+
+var width = 1600,
+    height = 550,
+    padding = 20;
+
+//Setting projection
+var projection = d3.geoRobinson().scale(200).translate([width / 2 - 150, height / 2 + 20]);
+
+var path = d3.geoPath().projection(projection);
+
+var circleScale = d3.scaleLinear().domain([1,52]).range([5,50]);
+var mapColor = ["#f0f4f8", "#80a5cc", "#6d86a1", "#425871", "#142538"];
+//SVG container
+
+var svg = d3.select("#map").append("svg")
+.attr("width", width)
+.attr("height", height);
+
+var layer1 = svg.append("g");
+var layer2 = svg.append("g");
+
+
+//extinction dataset collected from wikipedia
+//pre 1960 population dataset collected from wikipedia
+//post 1960 population dataset from https://www.kaggle.com/walla2ae/world-population
+d3.queue()
+.defer(d3.json, "data/continent-110m.json")
+.defer(d3.csv, "data/worldPopulation.csv")
+.defer(d3.csv, "data/populationBefore1960.csv")
+.defer(d3.csv, "data/extinction-by-time.csv")
+.defer(d3.csv, "data/coordinates.csv")
+//Main function
+.await(function (error, world, population, popuByContinent, extinctionData, coordinates) {
+
+    //make data into numbers
+    popuByContinent.forEach(function(d) {
+        for (var year = 1500; year <= 1900; year += 100) {
+        d[year] = Number(d[year]);
+        };
+        d[1950] = Number(d[1950]);
+    });
+
+    population.forEach(function(d) {
+        for (var year = 1960; year <= 2010; year += 10) {
+            d[year] = Number(d[year]);
+        }
+        d.id = Number(d.id);
+    });
+
+    //create slider
+    //slider source https://refreshless.com/nouislider/ see separate js file
+    var slider = document.getElementById("slider");
+
+    var range_all_sliders = {
+        'min': [ 1500, 100 ],
+        '60%': [ 1900, 50],
+        '70%': [ 1950, 10 ],
+        'max': [ 2010 ]       
+    };
+
+    noUiSlider.create(slider, {
+        connect: true,
+        behaviour: "drag",
+        range: range_all_sliders,
+        start: [ 1800, 2010 ],
+        pips: {
+            mode: 'values',
+            values: [1500, 1600, 1700, 1800, 1900, 1950, 1960,
+                    1970, 1980, 1990, 2000, 2010],
+            density: 100,
+            stepped: true
+        }
+    });
+
+    slider.noUiSlider.on("update", function (values) {
+        var from = Number(values[0]);
+        var to = Number(values[1]);
+
+        drawContinent(world, popuByContinent, population, to);
+        mapExtinction(extinctionData, from, to, coordinates, "#cc0000");
+    });
+
+
+    //show extinction by animal class selection
+    var animalClassColors = ["#ffcc00","#ff8c1a","#C26C55","#C23C5F","#f53dc7","#751aff"];
+
+    var allButtons = d3.selectAll(".icons");
+
+    allButtons.on("click", function(d, i) {
+        var animalValue = String(this.value);
+        var dataByClass = extinctionData.filter(function(d) { return d["Animal Class"] == animalValue; });
+        var yearRange = slider.noUiSlider.get();
+        mapExtinction(dataByClass, yearRange[0], yearRange[1], coordinates, animalClassColors[i])
+    })
+    .on("mouseover", function() {
+        d3.select(this).style("background-color", "#efecec");
+    })
+    .on("mouseout", function() {
+        d3.select(this).style("background-color", "transparent");
+    });
+
+    createLegend();
+
+});
+
+
+function mapExtinction(data, from, to, coordinates, color) {
+
+    var data = extinctionByInterval(data, from, to);
+    var occurrence = countOccurrence(data);
+
+    //nesting data by country 
+    //add coordinates and occurrence
+    nestedData = d3.nest().key(function(d) { return d.country; })
+        .entries(data);
+
+    nestedData.forEach(function(d) {
+        coordinates.forEach(function(e) {
+            if (e.name == d.key) {
+                d.coordinates = [Number(e.longitude), Number(e.latitude)];    
+            }
+        });
+        var country = d.key
+        d.count = occurrence[country];
+    })
+
+    var circles = layer2.selectAll("circle").data(nestedData);
+
+    circles.enter().append("circle")
+    .merge(circles)
+    .attr("class", "circles")
+    .attr("cx", function(d) { return projection(d.coordinates)[0]; })
+    .attr("cy", function(d) { return projection(d.coordinates)[1]; })
+    .style("fill", color)
+    .transition()
+    .attr("r", function(d) { return circleScale(d.count); })
+    .style("opacity", 0.8);
+
+    circles.exit().remove();
+
+    //country names on hover
+    var countryHover = d3.select("body")
+        .append("div")
+        .attr("class", "countryTooltip")
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("visibility", "hidden");
+
+    //mouseover functions
+    d3.selectAll(".circles")
+    .on("mouseover", function(d) { 
+        d3.select(this).attr("r", function(d) { return circleScale(d.count) + 5; }).style("opacity", 1);
+        return countryHover
+        .style("visibility", "visible")
+        .style("background", "white")
+        .style("padding", "3px")
+        .style("opacity", 0.9)
+        .style("border", "none")
+        .style("border-radius", "5px")
+        .text(d.key); 
+        })
+    .on("mousemove", function() { 
+        d3.select(this).attr("r", function(d) { return circleScale(d.count) + 5; }).style("opacity", 1);
+        return countryHover.style("top", (event.pageY - 10) + "px").style("left", (event.pageX + 10) + "px"); })
+    .on("mouseout", function() { 
+        d3.select(this).attr("r", function(d) { return circleScale(d.count); }).style("opacity", 0.8)
+        return countryHover.style("visibility", "hidden") })
+
+    //show extinct animal list of that country within selected time frame on click
+    .on("click", function(d) {
+
+        var arrayOfValues = d.values;
+
+        var classList = [];
+
+        arrayOfValues.forEach (function (d) {
+            if (classList.indexOf(d.animalClass) == -1){
+                classList.push(d.animalClass);
+            };
+        });
+
+        classList.sort();
+
+        d3.select(".overlay")
+        .style("height", "100%")
+        .style("opacity", 0.1)
+        .transition()
+        .style("opacity", 0.95);
+
+        classList.forEach(function(d) {
+            d3.select("#myNav").append("div")
+            .attr("class", "animalClass")
+            .attr("id", d)
+            .text(d)
+        });
+
+        arrayOfValues.forEach(function(d) {
+            d3.select("#"+d.animalClass).append("div")
+            .attr("class", "species")
+            .text(d.name + "  ,   " + d.extinctionTime);
+        });
+    });
+
+    var screen = d3.select("#myNav");
+
+    screen.on("click", function(d) {
+        screen.style("height", "0%");
+        d3.selectAll(".animalClass").remove();
+        d3.selectAll(".species").remove();
+    });
+}
+
+
+//helper to count occurrence of extinction in each country
+function countOccurrence(array) {
+    var countryList = [];
+
+    array.forEach(function(d) {
+        countryList.push(d.country);
+    });
+    countryList.sort();
+
+    var occurrence = {};
+
+    for (var i = 0, j = countryList.length; i < j; i ++) {
+        occurrence[countryList[i]] = (occurrence[countryList[i]] || 0) + 1;
+    }    
+    return occurrence;
+}
+
+
+//helper to create extinction dataset within the input time frame
+function extinctionByInterval(data, time1, time2) {
+    var extinctionByInterval = [];
+    data.forEach(function(d) {
+        var value = new Object();
+        if (d.Year >= time1 && d.Year < time2) {
+            value.animalClass = d["Animal Class"];
+            value.name = d["Common Name"]; 
+            if (d["Common Name"] == "") {
+                value.name = d["Species Name"];
+                }
+            value.extinctionTime = Number(d.Year);
+            value.country = d.Countries.trim();
+            extinctionByInterval.push(value);
+        };
+    });
+    return extinctionByInterval; 
+}
+
+
+function drawContinent(data, popuContinent, popuCountry, time) {
+
+    var countries = topojson.feature(data, data.objects.countries).features;
+
+    //find maximum population density
+    var maxPopu = d3.max(popuCountry, function (d) {return d[2010];});
+
+    var colorScale = d3.scaleLinear().domain([0, 80, 200, 500, maxPopu]).range(mapColor);
+
+
+    //draw map with population by continents
+    if (time < 1960) {
+        //creating data to draw continents
+        var continentNames = ["Asia", "Africa", "Europe", "North America", "South America", "Oceania"];
+        var continents = [];
+        continentNames.forEach(function(d, i) {
+        var continentName = d;
+        var value = {type: "FeatureCollection", name: d, id: i + 1, 
+                    color: colorScale(popuContinent[i][time]),
+                    features: countries.filter(function(d) { return d.properties.continent == continentName; })
+        };
+        continents.push(value);
+    });
+
+        var map = layer1.selectAll("path").data(continents);
+
+        map.enter().append("path")
+            .merge(map)
+            .attr("d", path)
+            .style("fill", function(d) { return d.color; });
+        map.exit().remove();
+    } 
+
+
+    else {
+        popuIdAndTime = [];
+
+        popuCountry.forEach(function(d) {
+            var id = d.id;
+            var population = d[time];
+            popuIdAndTime.push({id:id, population:population});
+        })
+
+        countries.forEach(function(d) {
+            popuIdAndTime.forEach(function(e) {
+                if (e.id == d.id) {
+                    d.color = colorScale(e.population);
+                }
+            })
+        });
+
+        var map = layer1.selectAll("path").data(countries);
+
+        map.enter().append("path")
+            .merge(map)
+            .attr("d", path)
+            .style("stroke", "#425871")
+            .style("stroke-width", 0.5)
+            .style("stroke-opacity", 0.1)
+            .style("fill", function(d) { return d.color; });
+        map.exit().remove();      
+    }
+}
+
+
+//helper to draw map legend
+function createLegend() {
+    var mapLegend = d3.select("#mapLegend").append("svg").attr("width", width).attr("height", 70);
+
+    var legendWidth = 150,
+        legendHeight = 10
+        translate = 900;
+
+    //creating gradient legend
+    //code reference https://www.visualcinnamon.com/2016/05/smooth-color-legend-d3-svg-gradient.html
+    var defs = mapLegend.append("defs");
+
+    var linearGradient = defs.append("linearGradient")
+        .attr("id", "linear-gradient")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "0%");
+
+    linearGradient.append("stop").attr("offset", "0%").attr("stop-color", mapColor[0]);
+    linearGradient.append("stop").attr("offset", "60%").attr("stop-color", mapColor[1]);
+    linearGradient.append("stop").attr("offset", "100%").attr("stop-color", "#68809b");
+
+    mapLegend.append("rect")
+        .attr("width", legendWidth)
+        .attr("height", legendHeight)
+        .attr("x", 100 + translate)
+        .attr("y", 20)
+        .style("fill", "url(#linear-gradient)")
+        .style("stroke", mapColor[1]).style("stroke-width", 0.5).style("stroke-opacity", 0.7);
+
+    mapLegend.append("text").attr("x", 90 + translate).attr("y", 15)
+    .text("less").style("fill", mapColor[1]);
+
+    mapLegend.append("text").attr("x", 240 + translate).attr("y", 15)
+    .text("more").style("fill", mapColor[3]);
+
+    mapLegend.append("text").attr("x", 135 + translate).attr("y", 44)
+    .text("population density").style("fill", mapColor[2]);
+}
+
+</script>
+</body>
