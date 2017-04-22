@@ -280,11 +280,11 @@ var layer2 = svg.append("g");
 //pre 1960 population dataset collected from wikipedia
 //post 1960 population dataset from https://www.kaggle.com/walla2ae/world-population
 d3.queue()
-.defer(d3.json, "data/continent-110m.json")
-.defer(d3.csv, "data/worldPopulation.csv")
-.defer(d3.csv, "data/populationBefore1960.csv")
-.defer(d3.csv, "data/extinction-by-time.csv")
-.defer(d3.csv, "data/coordinates.csv")
+.defer(d3.json, "thesixthextinction/data/continent-110m.json")
+.defer(d3.csv, "thesixthextinction/data/worldPopulation.csv")
+.defer(d3.csv, "thesixthextinction/data/populationBefore1960.csv")
+.defer(d3.csv, "thesixthextinction/data/extinction-by-time.csv")
+.defer(d3.csv, "thesixthextinction/data/coordinates.csv")
 //Main function
 .await(function (error, world, population, popuByContinent, extinctionData, coordinates) {
 
